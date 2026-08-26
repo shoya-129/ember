@@ -1,0 +1,372 @@
+import native.ember
+
+
+
+@Docs(
+"---
+A two-dimensional vector containing an X and Y value.
+
+In Ember, Vector2 is used primarily to represent:
+- Sprite positions
+- Sprite scale
+- Velocity
+- Movement direction
+- Spatial offsets
+
+Example:
+```flame
+let mut position = ember.vector2(100.0, 300.0)
+let mut velocity = ember.vector2(0.0, -350.0)
+
+// Access components
+let x = position.x()
+let y = position.y()
+
+// Modify components
+position.setX(200.0)
+position.setY(400.0)
+```
+
+Modify components with setX() and setY()."
+)
+export fn vector2(x: Float, y: Float) -> Vector2 {
+    return ember.Vector2.new(x, y)
+}
+
+@Docs(
+"---
+Creates a new Sprite from an image file path.
+
+A Sprite is a 2D image that can be drawn on the screen. It can be positioned, scaled, and transformed.
+You can specify the path to the image file, and the engine will load and render it.
+
+Example:
+```flame
+let mut spr = ember.sprite(\"bird.png\")
+spr.setPosition(ember.vector2(100.0, 300.0))
+spr.setScale(ember.vector2(2.0, 2.0))
+```
+
+// Getters
+game.run()
+
+"
+)
+export fn sprite(path: String) -> Sprite {
+    return ember.Sprite.new(path)
+}
+
+@Docs(
+"---
+Creates and initializes a new Ember `Game` instance and injects it as a global `game` variable into the annotated function.
+
+`Game` provides the core runtime API used to create and control a Flame game window. It manages the game window, frame timing, keyboard and mouse input, framebuffer clearing, rendering, and frame presentation.
+
+### Lifecycle Methods
+- `game.run()`: Opens the window and starts the game clock.
+- `game.running() -> Bool`: Returns `true` if the window is open and the Escape key hasn't been pressed. Use this for your main loop.
+- `game.quit()`: Closes the game window.
+- `game.setTargetFPS(fps: Float)`: Limits the frame rate (e.g. 60.0 or 144.0). Defaults to 60 FPS.
+
+### Game Loop Methods
+- `game.update()`: Updates the internal clock. Must be called at the start of every frame.
+- `game.deltaTime() -> Float`: Returns the time in seconds since the last frame (capped to prevent physics explosions).
+- `game.clear()`: Clears the render queue and paints the background dark gray. Call this before drawing.
+- `game.render()`: Flushes the render queue to the screen and handles frame pacing/sleeping.
+
+### Input Methods
+- `game.isKeyDown(key: String) -> Bool`: Returns `true` while the specified key is held down (e.g., \"Space\", \"Up\", \"Down\").
+- `game.isKeyPressed(key: String) -> Bool`: Returns `true` only on the frame the key was initially pressed.
+- `game.isMouseDown() -> Bool`: Returns `true` while the left mouse button is held down.
+- `game.mouseX() -> Float` / `game.mouseY() -> Float`: Returns the current X and Y coordinates of the mouse cursor relative to the window and camera.
+
+### Drawing Methods
+- `game.draw(sprite: &Sprite)`: Submits a sprite to the render queue for this frame.
+- `game.drawText(text: &Text)`: Submits text to the render queue.
+- `game.drawRect(rect: &Rect, color: Int)`: Submits a solid colored rectangle to the render queue.
+
+Example:
+```flame
+@Game(
+    title = \"Flame Engine V2\",
+    width = 800,
+    height = 600
+)
+fn main() {
+    game.setTargetFPS(60.0)
+    game.run()
+
+    while game.running() {
+        game.update()
+        game.clear()
+        
+        // Input handling
+        if game.isKeyPressed(\"Space\") {
+            print(\"Jump!\")
+        }
+
+        // Draw calls
+        game.draw(&my_sprite)
+        
+        game.render()
+    }
+
+    game.quit()
+}
+```"
+)
+export annotation Game(title: String, width: Int, height: Int) -> Game {
+    return ember.Game.new(title, width, height)
+}
+
+@Docs(
+"---
+Creates a new Text object for rendering text to the screen.
+
+The Text object uses a built-in bitmap font. You can change its content, position, color, and scale.
+
+Example:
+```flame
+let mut ui_text = ember.text(\"Score: 0\")
+ui_text.setPosition(ember.vector2(10.0, 10.0))
+ui_text.setColor(255, 255, 255)
+ui_text.setScale(4) // Increase text size
+```"
+)
+export fn text(content: String) -> Text {
+    return ember.Text.new(content)
+}
+
+@Docs(
+"---
+Checks if two Rectangles overlap (intersect).
+
+This uses standard Axis-Aligned Bounding Box (AABB) collision detection.
+Returns `true` if the rectangles overlap, `false` otherwise.
+
+Example:
+```flame
+let b_rect = bird.rect()
+let p_rect = pipe.rectTop()
+
+if ember.intersects(&b_rect, &p_rect) {
+    // Collision detected!
+}
+```"
+)
+export fn intersects(a: &Rect, b: &Rect) -> Bool {
+    return ember.intersects(&a, &b)
+}
+
+@Docs(
+"---
+Creates a new Rectangle for collision detection.
+
+Rectangles are defined by their top-left `(x, y)` coordinate, a `width`, and a `height`.
+
+Example:
+```flame
+let bounding_box = ember.rect(100.0, 100.0, 50.0, 50.0)
+```"
+)
+export fn rect(x: Float, y: Float, width: Float, height: Float) -> Rect {
+    return ember.Rect.new(x, y, width, height)
+}
+
+@Docs(
+"---
+Generates a random Float between the specified `min` and `max` (exclusive).
+
+Example:
+```flame
+let gap_y = ember.random(200.0, 500.0)
+```"
+)
+export fn random(min: Float, max: Float) -> Float {
+    return ember.random(min, max)
+}
+
+@Docs("
+---
+A lightweight physics body for handling basic 2D movement and gravity.
+
+`PhysicsBody` wraps a `Sprite` and applies velocity and gravity calculations over time.
+It is primarily used for entities that need to jump, fall, or move smoothly.
+
+Properties:
+- `sprite`: The visual representation of the body.
+- `velocity`: A `Vector2` tracking the current movement speed (X, Y).
+- `gravity`: A `Float` determining how fast the body falls downwards.
+
+Methods:
+- `applyGravity(dt: Float)`: Updates velocity based on gravity and moves the sprite. Call this every frame during `update`.
+- `jump(strength: Float)`: Applies an immediate upwards velocity force (negative Y direction).
+
+Example:
+```flame
+// Create a physics body with gravity of 900.0
+let mut my_phys = PhysicsBody {
+    sprite: ember.sprite(\"player.png\"),
+    velocity: ember.vector2(0.0, 0.0),
+    gravity: 900.0
+}
+
+// In your update loop:
+my_phys.applyGravity(game.deltaTime())
+
+// Make the body jump:
+if game.isKeyPressed(\"Space\") {
+    my_phys.jump(350.0)
+}
+```
+")
+export struct PhysicsBody {
+    sprite: Sprite,
+    velocity: Vector2,
+    gravity: Float
+}
+
+@Docs("
+---
+Represents the current state of a game.
+
+Use Scene to control game flow and switch behavior between different game states.
+
+Values:
+- START — Initial state before gameplay begins.
+- PLAYING — Active gameplay state.
+- GAME_OVER — State after the player loses.
+
+Example:
+```flame 
+let mut scene = ember.Scene.START
+
+match scene {
+    ember.Scene.START => { }
+    ember.Scene.PLAYING => { }
+    ember.Scene.GAME_OVER => { }
+}
+```
+")
+export enum Scene {
+    START,
+    PLAYING,
+    GAME_OVER
+}
+
+@Docs("
+---
+A simple interactive UI button with customizable background and text colors.
+
+`Button` renders a clickable rectangular area with a centered text label. It handles
+its own input bounds-checking via the `onPress` method.
+
+Properties:
+- `text`: The Ember `Text` object for the label.
+- `rect`: The bounding `Rect` used for collision and rendering.
+- `bgR`, `bgG`, `bgB`: Background color RGB values.
+- `txtR`, `txtG`, `txtB`: Text color RGB values.
+
+Methods:
+- `Button.new(x, y, w, h, label, bgR, bgG, bgB, txtR, txtG, txtB)`: Creates a new button and centers the text.
+- `onPress(mouseX, mouseY, isMouseDown, action)`: Checks if the mouse coordinates fall within the button's rectangle and the mouse button is pressed. If true, the `action` is executed.
+
+Example:
+```flame
+// Create a button at (100, 100) with a blue background and white text.
+let mut start_btn = Button.new(
+    100.0, 100.0, 200.0, 50.0, 
+    \"START GAME\", 
+    0, 0, 255,   // Background (Blue)
+    255, 255, 255 // Text (White)
+)
+
+// In your game loop update function:
+start_btn.onPress(game.mouseX(), game.mouseY(), game.isMouseDown(), () {
+    print(\"Button clicked!\")
+    scene = Scene.PLAYING
+})
+
+// In your game loop render function:
+game.drawRect(&start_btn.rect, 255)
+game.drawText(&start_btn.text)
+```
+")
+export struct Button {
+    text: Text,
+    rect: Rect,
+    bgR: Int,
+    bgG: Int,
+    bgB: Int,
+    txtR: Int,
+    txtG: Int,
+    txtB: Int
+}
+
+impl Button {
+    fn new(x: Float, y: Float, width: Float, height: Float, label: String, bgR: Int, bgG: Int, bgB: Int, txtR: Int, txtG: Int, txtB: Int) -> Button {
+        let mut t = ember.text(label)
+
+        t.setScale(2)
+        t.setColor(txtR, txtG, txtB)
+        
+        let text_w = t.width()
+        let text_h = t.height()
+        
+        let tx = x + (width - text_w) / 2.0
+        let ty = y + (height - text_h) / 2.0
+        
+        t.setPosition(ember.vector2(tx, ty))
+        
+        let r = ember.rect(x, y, width, height)
+
+        return Button {
+            text: t,
+            rect: r,
+            bgR: bgR,
+            bgG: bgG,
+            bgB: bgB,
+            txtR: txtR,
+            txtG: txtG,
+            txtB: txtB
+        }
+
+    }
+
+    fn onPress(&mut self, mouseX: Float, mouseY: Float, isMouseDown: Bool, action: ()) {
+        if isMouseDown {
+            if mouseX >= self.rect.x() {
+                if mouseX <= self.rect.x() + self.rect.width() {
+                    if mouseY >= self.rect.y() {
+                        if mouseY <= self.rect.y() + self.rect.height() {
+                            action()
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+impl PhysicsBody {
+    fn applyGravity(&mut self, dt: Float) {
+        let vy = self.velocity.y()
+
+        self.velocity.setY(vy + self.gravity * dt)
+        let pos = self.sprite.position()
+
+        pos.setY(pos.y() + self.velocity.y() * dt)
+        self.sprite.setPosition(pos)
+    }
+
+    fn jump(&mut self, strength: Float) {
+        self.velocity.setY( - strength)
+    }
+
+}

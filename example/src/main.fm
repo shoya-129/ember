@@ -1,0 +1,271 @@
+import ember
+
+
+
+struct Bird {
+    phys: PhysicsBody,
+    alive: Bool
+}
+
+impl Bird {
+    fn new() -> Bird {
+        let mut sprite = ember.sprite("bird.png")
+
+        sprite.setPosition(ember.vector2(100.0, 300.0))
+        sprite.setScale(ember.vector2(0.1, 0.1))
+        let phys = PhysicsBody {
+            sprite: sprite,
+            velocity: ember.vector2(0.0, 0.0),
+            gravity: 900.0
+
+        }
+
+        return Bird {
+            phys: phys,
+            alive: true
+        }
+
+    }
+
+    fn jump(&mut self) {
+        if self.alive {
+            self.phys.jump(350.0)
+        }
+
+    }
+
+    fn update(&mut self, dt: Float) {
+        self.phys.applyGravity(dt)
+        let pos = self.phys.sprite.position()
+
+        if pos.y() > 720.0 {
+            self.alive = false
+        }
+
+        if pos.y() < 0.0 {
+            self.phys.velocity.setY(0.0)
+            self.phys.sprite.setPosition(ember.vector2(pos.x(), 0.0))
+        }
+
+    }
+
+    fn rect(&mut self) -> Rect {
+        let pos = self.phys.sprite.position()
+
+        return ember.rect(pos.x() + 15.0, pos.y() + 15.0, 20.0, 20.0)
+    }
+
+}
+
+struct Pipe {
+    sprite_top: Sprite,
+    sprite_bottom: Sprite,
+    x: Float,
+    passed: Bool
+}
+
+impl Pipe {
+    fn new(x: Float) -> Pipe {
+        let mut top = ember.sprite("pipe-top.png")
+        let mut bottom = ember.sprite("pipe-top.png")
+        let gap_y = ember.random(200.0, 500.0)
+
+        top.setScale(ember.vector2(0.25, 0.9))
+        bottom.setScale(ember.vector2(0.133, 0.9))
+        // Top pipe has left/right padding, scaling it up makes it match the bottom pipe visually
+        top.setPosition(ember.vector2(x.clone(), gap_y.clone() - 600.0))
+        bottom.setPosition(ember.vector2(x.clone(), gap_y + 150.0))
+        return Pipe {
+            sprite_top: top,
+            sprite_bottom: bottom,
+            x: x,
+            passed: false
+        }
+
+    }
+
+    fn update(&mut self, dt: Float) {
+        self.x = self.x - (150.0 * dt)
+        let top_pos = self.sprite_top.position()
+        let bottom_pos = self.sprite_bottom.position()
+
+        self.sprite_top.setPosition(ember.vector2(self.x.clone(), top_pos.y()))
+        self.sprite_bottom.setPosition(ember.vector2(self.x.clone(), bottom_pos.y()))
+    }
+
+    fn rectTop(&mut self) -> Rect {
+        let pos = self.sprite_top.position()
+
+        // Top pipe has horizontal padding, so we shift X inwards and use a smaller width
+        return ember.rect(pos.x() + 25.0, pos.y(), 46.0, 595.0)
+    }
+
+    fn rectBottom(&mut self) -> Rect {
+        let pos = self.sprite_bottom.position()
+
+        // Bottom pipe has a huge transparent padding at the top, so we shift Y downwards
+        return ember.rect(pos.x() + 2.0, pos.y() + 110.0, 46.0, 490.0)
+    }
+
+}
+
+fn formatScore(score: Int) -> String {
+    return $"Score: {score}"
+}
+
+@Game(
+title = "Flame Bird",
+width = 480,
+height = 720
+)
+fn main() {
+    let mut bird = Bird.new()
+    let mut bg = ember.sprite("bg.png")
+
+    bg.setPosition(ember.vector2(0.0, 0.0))
+    bg.setScale(ember.vector2(1.0, 1.8))
+    let mut pipe1 = Pipe.new(500.0)
+    let mut pipe2 = Pipe.new(800.0)
+    let mut score = 0
+    let mut score_text = ember.text("Score: 0")
+
+    score_text.setPosition(ember.vector2(10.0, 10.0))
+    score_text.setColor(0, 0, 0)
+    score_text.setScale(2)
+    let mut scene = ember.Scene.START
+    let mut start_btn = ember.Button.new(140.0, 350.0, 200.0, 50.0, "PLAY GAME", 50, 150, 255, 255, 255, 255)
+    let mut retry_btn = ember.Button.new(140.0, 350.0, 200.0, 50.0, "RETRY", 255, 50, 50, 255, 255, 255)
+    let mut game_over_text = ember.text("GAME OVER")
+
+    game_over_text.setPosition(ember.vector2(96.0, 200.0))
+    game_over_text.setScale(4)
+    game_over_text.setColor(255, 50, 50)
+    game.setTargetFPS(60.0)
+    game.run()
+    while game.running() {
+        game.update()
+        let mut dt = game.deltaTime()
+
+        // Cap dt to prevent physics glitches during lag spikes
+        if dt > 0.05 {
+            dt = 0.05
+        }
+
+        if game.isKeyPressed("Space") {
+            if scene == ember.Scene.PLAYING {
+                bird.jump()
+            }
+
+        }
+
+        if scene == ember.Scene.START {
+            start_btn.onPress(
+                game.mouseX(), 
+                game.mouseY(), 
+                game.isMouseDown(), 
+                () {
+                    scene = ember.Scene.PLAYING
+                    bird.jump()
+                }
+            )
+        }
+
+        if scene == ember.Scene.GAME_OVER {
+            retry_btn.onPress(
+                game.mouseX(), 
+                game.mouseY(), 
+                game.isMouseDown(), 
+                () {
+                    bird = Bird.new()
+                    pipe1 = Pipe.new(500.0)
+                    pipe2 = Pipe.new(800.0)
+                    score = 0
+                    scene = ember.Scene.START
+                    score_text.setContent("Score: 0")
+                }
+            )
+        }
+
+        match scene {
+            ember.Scene.PLAYING => {
+                bird.update(dt.clone())
+                pipe1.update(dt.clone())
+                pipe2.update(dt.clone())
+                if pipe1.x < - 50.0 {
+                    pipe1 = Pipe.new(pipe2.x + 300.0)
+                }
+
+                if pipe2.x < - 50.0 {
+                    pipe2 = Pipe.new(pipe1.x + 300.0)
+                }
+
+                let b_rect = bird.rect()
+
+                if ember.intersects(&b_rect, &pipe1.rectTop())or ember.intersects(&b_rect, &pipe1.rectBottom())or ember.intersects(&b_rect, &pipe2.rectTop())or ember.intersects(&b_rect, &pipe2.rectBottom()) {
+                    bird.alive = false
+                }
+
+                if bird.alive == false {
+                    scene = ember.Scene.GAME_OVER
+                }
+
+                if pipe1.passed == false {
+                    if bird.phys.sprite.position().x() > pipe1.x + 50.0 {
+                        pipe1.passed = true
+                        score = score + 1
+                        score_text.setContent(formatScore(score.clone()))
+                    }
+
+                }
+
+                if pipe2.passed == false {
+                    if bird.phys.sprite.position().x() > pipe2.x + 50.0 {
+                        pipe2.passed = true
+                        score = score + 1
+                        score_text.setContent(formatScore(score.clone()))
+                    }
+
+                }
+
+            }
+
+            ember.Scene.GAME_OVER => {
+                // Button handles the retry logic
+            }
+
+            ember.Scene.START => {
+                // Do nothing
+            }
+
+        }
+
+        game.clear()
+        game.draw(&bg)
+        game.draw(&pipe1.sprite_top)
+        game.draw(&pipe1.sprite_bottom)
+        game.draw(&pipe2.sprite_top)
+        game.draw(&pipe2.sprite_bottom)
+        game.draw(&bird.phys.sprite)
+        game.drawText(&score_text)
+        if scene == ember.Scene.START {
+            let color = start_btn.bgR * 65536 + start_btn.bgG * 256 + start_btn.bgB
+
+            game.drawRoundedRect(&start_btn.rect, color, 12.0)
+            game.drawText(&start_btn.text)
+        }
+
+        if scene == ember.Scene.GAME_OVER {
+            let color = retry_btn.bgR * 65536 + retry_btn.bgG * 256 + retry_btn.bgB
+
+            game.drawRoundedRect(&retry_btn.rect, color, 12.0)
+            game.drawText(&retry_btn.text)
+            game.drawText(&game_over_text)
+        }
+
+        game.render()
+    }
+
+    game.quit()
+}
+
+main()
