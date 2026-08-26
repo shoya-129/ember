@@ -8,4 +8,4 @@ type = "pkg"
 std = "0.1.0"
 
 [plugins]
-ember = "./native"
+embereng = "./native"

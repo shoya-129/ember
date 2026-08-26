@@ -1,4 +1,4 @@
-import native.ember
+import native.embereng
 
 
 
@@ -30,7 +30,7 @@ position.setY(400.0)
 Modify components with setX() and setY()."
 )
 export fn vector2(x: Float, y: Float) -> Vector2 {
-    return ember.Vector2.new(x, y)
+    return embereng.Vector2.new(x, y)
 }
 
 @Docs(
@@ -53,7 +53,7 @@ game.run()
 "
 )
 export fn sprite(path: String) -> Sprite {
-    return ember.Sprite.new(path)
+    return embereng.Sprite.new(path)
 }
 
 @Docs(
@@ -116,7 +116,7 @@ fn main() {
 ```"
 )
 export annotation Game(title: String, width: Int, height: Int) -> Game {
-    return ember.Game.new(title, width, height)
+    return embereng.Game.new(title, width, height)
 }
 
 @Docs(
@@ -134,7 +134,7 @@ ui_text.setScale(4) // Increase text size
 ```"
 )
 export fn text(content: String) -> Text {
-    return ember.Text.new(content)
+    return embereng.Text.new(content)
 }
 
 @Docs(
@@ -155,7 +155,7 @@ if ember.intersects(&b_rect, &p_rect) {
 ```"
 )
 export fn intersects(a: &Rect, b: &Rect) -> Bool {
-    return ember.intersects(&a, &b)
+    return embereng.intersects(&a, &b)
 }
 
 @Docs(
@@ -170,7 +170,7 @@ let bounding_box = ember.rect(100.0, 100.0, 50.0, 50.0)
 ```"
 )
 export fn rect(x: Float, y: Float, width: Float, height: Float) -> Rect {
-    return ember.Rect.new(x, y, width, height)
+    return embereng.Rect.new(x, y, width, height)
 }
 
 @Docs(
@@ -183,7 +183,7 @@ let gap_y = ember.random(200.0, 500.0)
 ```"
 )
 export fn random(min: Float, max: Float) -> Float {
-    return ember.random(min, max)
+    return embereng.random(min, max)
 }
 
 @Docs("
