@@ -119,34 +119,15 @@ width = 480,
 height = 720
 )
 fn main() {
-    print("Starting main...")
-
     let mut bird = Bird.new()
-
-    print("Bird created")
-
     let mut bg = ember.sprite("bg.png")
 
-    print("bg created")
-
     bg.setPosition(ember.vector2(0.0, 0.0))
-    print("bg position set")
-
     bg.setScale(ember.vector2(1.0, 1.8))
-    print("bg scale set")
-
     let mut pipe1 = Pipe.new(500.0)
-
-    print("pipe1 created")
-
     let mut pipe2 = Pipe.new(800.0)
-
-    print("pipe2 created")
-
     let mut score = 0
-    print("Calling ember.text...")
     let mut score_text = ember.text("Score: 0")
-    print("ember.text returned")
 
     score_text.setPosition(ember.vector2(10.0, 10.0))
     score_text.setColor(0, 0, 0)
@@ -160,14 +141,8 @@ fn main() {
     game_over_text.setScale(4)
     game_over_text.setColor(255, 50, 50)
     game.setTargetFPS(60.0)
-    print("FPS set")
-
     game.run()
-    print("Game run")
-
     while game.running() {
-        print("Looping...")
-
         game.update()
         let mut dt = game.deltaTime()
 
