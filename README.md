@@ -1,8 +1,9 @@
 # Ember Engine
 
-Ember is a high-performance, 60 FPS 2D game engine built natively in Rust and scripted entirely in **Flame** (`.fm`). 
+Ember is a high-performance, 60 FPS 2D game engine built natively in Rust and scripted entirely in **Flame** (`.fm`).
 
 ## Features
+
 - **Blazing Fast 2D Renderer**: Uses deferred rendering, integer-only blitting, and intelligent texture caching to easily maintain a solid 60 FPS even with hundreds of sprites.
 - **Camera & Frustum Culling**: Built-in `Camera` support that automatically culls off-screen sprites, text, and rects to save CPU cycles.
 - **Interactive UI Components**: Includes a fully functional `Button` UI component with bounds checking, click detection, perfectly centered text, and rounded corners!
@@ -15,6 +16,7 @@ Ember is a high-performance, 60 FPS 2D game engine built natively in Rust and sc
 ## Getting Started
 
 ### The `Game` Annotation
+
 Ember uses a global `@Game` annotation to initialize the window and inject the `game` object into your `main()` loop.
 
 ```flame
@@ -43,6 +45,7 @@ fn main() {
 ```
 
 ### Rendering Sprites
+
 Sprites are automatically cached upon loading so you can spawn hundreds of the same image without memory leaks.
 
 ```flame
@@ -55,6 +58,7 @@ game.draw(&player)
 ```
 
 ### Physics Bodies
+
 Wrap a sprite in a `PhysicsBody` to get instant gravity and velocity handling.
 
 ```flame
@@ -73,6 +77,7 @@ if game.isKeyPressed("Space") {
 ```
 
 ### UI Buttons
+
 Create interactive buttons with beautifully rounded corners and auto-centered text.
 
 ```flame
@@ -95,7 +100,9 @@ game.drawText(&start_btn.text)
 ```
 
 ## Playable Example: Flappy Bird
+
 We've included a full, playable **Flappy Bird** clone inside the [`example`](./example) directory! It demonstrates:
+
 - State management (`START`, `PLAYING`, `GAME_OVER`)
 - Infinite scrolling pipes and procedural generation
 - AABB bounding box collision detection

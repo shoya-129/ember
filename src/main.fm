@@ -1,3 +1,5 @@
+@Docs("Ember is a high-performance, 60 FPS 2D game engine built natively in Rust and scripted entirely in **Flame** (`.fm`).")
+package ember
 import native.embereng
 
 
@@ -309,15 +311,12 @@ impl Button {
 
         t.setScale(2)
         t.setColor(txtR, txtG, txtB)
-        
         let text_w = t.width()
         let text_h = t.height()
-        
         let tx = x + (width - text_w) / 2.0
         let ty = y + (height - text_h) / 2.0
-        
+
         t.setPosition(ember.vector2(tx, ty))
-        
         let r = ember.rect(x, y, width, height)
 
         return Button {
@@ -366,7 +365,7 @@ impl PhysicsBody {
     }
 
     fn jump(&mut self, strength: Float) {
-        self.velocity.setY( - strength)
+        self.velocity.setY(-strength)
     }
 
 }

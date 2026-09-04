@@ -186,11 +186,11 @@ fn main() {
                 bird.update(dt.clone())
                 pipe1.update(dt.clone())
                 pipe2.update(dt.clone())
-                if pipe1.x < - 50.0 {
+                if pipe1.x <-50.0 {
                     pipe1 = Pipe.new(pipe2.x + 300.0)
                 }
 
-                if pipe2.x < - 50.0 {
+                if pipe2.x <-50.0 {
                     pipe2 = Pipe.new(pipe1.x + 300.0)
                 }
 
